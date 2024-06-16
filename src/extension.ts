@@ -17,6 +17,34 @@ function getCurrentOpenedFolder(): string | undefined {
   return undefined;
 }
 
+function getFileIcon(fileName: string): string {
+  if (fileName.toUpperCase() == "LICENSE") {
+    return "key";
+  }
+
+  if (
+    fileName.toLowerCase() == "readme.md" ||
+    fileName.toLowerCase() == "changelog.md" ||
+    fileName.toLowerCase() == "contributing.md"
+  ) {
+    return "book";
+  }
+
+  if (fileName.endsWith(".bin")) {
+    return "file-binary";
+  }
+
+  if (fileName.endsWith(".pdf")) {
+    return "file-pdf";
+  }
+
+  if (fileName.includes("test")) {
+    return "beaker";
+  }
+
+  return "file-text";
+}
+
 async function getAllFiles(dir: string): Promise<string[]> {
   const ig = ignore();
   const gitignorePath = path.join(dir, ".gitignore");
@@ -67,7 +95,8 @@ export async function showQuickPick() {
   const filenames = await getAllFiles(folder);
 
   const quickPickItems = filenames.map((file) => ({
-    label: "$(file-text) " + path.relative(folder, file),
+    label:
+      `$(${getFileIcon(path.basename(file))}) ` + path.relative(folder, file),
     description: "",
     fullPath: path.join(folder, file),
   }));
