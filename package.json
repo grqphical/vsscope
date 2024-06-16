@@ -1,8 +1,8 @@
 {
   "name": "vsscope",
-  "displayName": "vs-scope",
-  "description": "",
-  "version": "0.0.1",
+  "displayName": "VSScope",
+  "description": "A telescope menu for VS Code. Based on telescope for Neovim",
+  "version": "1.0.0",
   "engines": {
     "vscode": "^1.90.0"
   },
