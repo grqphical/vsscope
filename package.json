@@ -12,10 +12,27 @@
   "activationEvents": [],
   "main": "./out/extension.js",
   "contributes": {
+    "configuration": {
+      "title": "VSScope Settings",
+      "properties": {
+        "vsscope.openInNewEditor": {
+          "type": "boolean",
+          "default": true,
+          "description": "Opens files in a new editor"
+        }
+      }
+    },
     "commands": [
       {
-        "command": "vsscope.helloWorld",
-        "title": "Hello World"
+        "command": "vsscope.telescopeMenu",
+        "title": "VSScope Menu"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "vsscope.telescopeMenu",
+        "key": "ctrl+shift+j",
+        "mac": "cmd+shift+j"
       }
     ]
   },

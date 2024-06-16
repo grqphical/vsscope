@@ -1,24 +1,74 @@
+import * as fs from "fs";
+import * as path from "path";
 import * as vscode from "vscode";
+import { window } from "vscode";
+
+function getCurrentOpenedFolder(): string | undefined {
+  const folders = vscode.workspace.workspaceFolders;
+  if (folders && folders.length > 0) {
+    return folders[0].uri.fsPath;
+  }
+  return undefined;
+}
+
+async function getFilesInDirectory(dirPath: string): Promise<string[]> {
+  return new Promise((resolve, reject) => {
+    fs.readdir(dirPath, (err, files) => {
+      if (err) {
+        return reject(err);
+      }
+
+      let filenames = files.filter((file) =>
+        fs.statSync(path.join(dirPath, file)).isFile()
+      );
+
+      resolve(filenames);
+    });
+  });
+}
+
+export async function showQuickPick() {
+  let folder = getCurrentOpenedFolder();
+  if (folder === undefined) {
+    window.showErrorMessage("Open a folder to use VSScope");
+    return;
+  }
+
+  const filenames = await getFilesInDirectory(folder);
+
+  const quickPickItems = filenames.map((file) => ({
+    label: "$(file-text) " + file,
+    description: "",
+    fullPath: path.join(folder, file),
+  }));
+
+  const selectedFile = await window.showQuickPick(quickPickItems, {
+    placeHolder: "File To Open",
+  });
+
+  if (selectedFile) {
+    const document = await vscode.workspace.openTextDocument(
+      selectedFile.fullPath
+    );
+    await vscode.window.showTextDocument(document, {
+      preview: !vscode.workspace
+        .getConfiguration("vsscope")
+        .get<boolean>("openInNewEditor"),
+    });
+  }
+}
 
 export function activate(context: vscode.ExtensionContext) {
-  // Use the console to output diagnostic information (console.log) and errors (console.error)
-  // This line of code will only be executed once when your extension is activated
-  console.log('Congratulations, your extension "vsscope" is now active!');
+  console.log("vs-scope is activated");
 
-  // The command has been defined in the package.json file
-  // Now provide the implementation of the command with registerCommand
-  // The commandId parameter must match the command field in package.json
   const disposable = vscode.commands.registerCommand(
-    "vsscope.helloWorld",
+    "vsscope.telescopeMenu",
     () => {
-      // The code you place here will be executed every time your command is executed
-      // Display a message box to the user
-      vscode.window.showInformationMessage("Hello World");
+      showQuickPick();
     }
   );
 
   context.subscriptions.push(disposable);
 }
 
-// This method is called when your extension is deactivated
 export function deactivate() {}
