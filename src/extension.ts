@@ -98,7 +98,7 @@ export async function showQuickPick() {
     label:
       `$(${getFileIcon(path.basename(file))}) ` + path.relative(folder, file),
     description: "",
-    fullPath: path.join(folder, file),
+    fullPath: file,
   }));
 
   const selectedFile = await window.showQuickPick(quickPickItems, {
