@@ -73,7 +73,7 @@ export async function showQuickPick() {
   }));
 
   const selectedFile = await window.showQuickPick(quickPickItems, {
-    placeHolder: "File To Open",
+    placeHolder: "Select a file to open",
   });
 
   if (selectedFile) {

@@ -14,6 +14,8 @@ The command that invokes the menu is `vsscope.telescopeMenu`. Use it to change t
 
 You can control whether or not the file is opened in a new editor with the `vsscope.openInNewEditor` setting. By default it is set to `true`
 
+You can control what files/folder are ignored by VSScope with the `vsscope.ignore` setting. It supports the format used by .gitignore
+
 ## License
 
 VSScope is licensed under the MIT License
