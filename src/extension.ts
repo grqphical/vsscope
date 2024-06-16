@@ -1,7 +1,13 @@
 import * as fs from "fs";
+import ignore from "ignore";
 import * as path from "path";
+import { promisify } from "util";
 import * as vscode from "vscode";
 import { window } from "vscode";
+
+const readdir = promisify(fs.readdir);
+const stat = promisify(fs.stat);
+const readFile = promisify(fs.readFile);
 
 function getCurrentOpenedFolder(): string | undefined {
   const folders = vscode.workspace.workspaceFolders;
@@ -11,20 +17,38 @@ function getCurrentOpenedFolder(): string | undefined {
   return undefined;
 }
 
-async function getFilesInDirectory(dirPath: string): Promise<string[]> {
-  return new Promise((resolve, reject) => {
-    fs.readdir(dirPath, (err, files) => {
-      if (err) {
-        return reject(err);
-      }
+async function getAllFiles(dir: string): Promise<string[]> {
+  const ig = ignore();
+  const gitignorePath = path.join(dir, ".gitignore");
 
-      let filenames = files.filter((file) =>
-        fs.statSync(path.join(dirPath, file)).isFile()
-      );
+  if (fs.existsSync(gitignorePath)) {
+    const gitignoreContent = await readFile(gitignorePath, "utf8");
+    ig.add(gitignoreContent);
+    ig.add(".git");
+  }
 
-      resolve(filenames);
-    });
-  });
+  let results: string[] = [];
+  const list = await readdir(dir);
+
+  for (const file of list) {
+    const filePath = path.join(dir, file);
+    const relativePath = path.relative(dir, filePath);
+
+    if (ig.ignores(relativePath)) {
+      continue; // Ignore files/folders specified in .gitignore
+    }
+
+    const fileStat = await stat(filePath);
+
+    if (fileStat && fileStat.isDirectory()) {
+      const res = await getAllFiles(filePath);
+      results = results.concat(res);
+    } else {
+      results.push(filePath);
+    }
+  }
+
+  return results;
 }
 
 export async function showQuickPick() {
@@ -34,10 +58,10 @@ export async function showQuickPick() {
     return;
   }
 
-  const filenames = await getFilesInDirectory(folder);
+  const filenames = await getAllFiles(folder);
 
   const quickPickItems = filenames.map((file) => ({
-    label: "$(file-text) " + file,
+    label: "$(file-text) " + path.relative(folder, file),
     description: "",
     fullPath: path.join(folder, file),
   }));
