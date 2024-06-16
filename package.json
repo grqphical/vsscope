@@ -19,6 +19,13 @@
           "type": "boolean",
           "default": true,
           "description": "Opens files in a new editor"
+        },
+        "vsscope.ignore": {
+          "type": "array",
+          "default": [
+            ".git"
+          ],
+          "description": "Files/Folders to ignore in the menu. Supports the .gitignore conventions"
         }
       }
     },

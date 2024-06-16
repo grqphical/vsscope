@@ -24,7 +24,13 @@ async function getAllFiles(dir: string): Promise<string[]> {
   if (fs.existsSync(gitignorePath)) {
     const gitignoreContent = await readFile(gitignorePath, "utf8");
     ig.add(gitignoreContent);
-    ig.add(".git");
+    let ignore_rules = vscode.workspace
+      .getConfiguration("vsscope")
+      .get<Array<string>>("ignore");
+
+    ignore_rules?.forEach((rule) => {
+      ig.add(rule);
+    });
   }
 
   let results: string[] = [];
